@@ -24,6 +24,6 @@ for seq1 in msa:
 
 # Simpan sebagai dataframe
 df = pd.DataFrame(matrix, index=labels, columns=labels)
-df.to_csv('data/result.tsv', sep='\t')
+df.to_csv('data/distance_result.tsv', sep='\t')
 
-print("✅ Distance matrix saved to data/result.tsv")
+print("✅ Distance matrix saved to data/distance_result.tsv")
