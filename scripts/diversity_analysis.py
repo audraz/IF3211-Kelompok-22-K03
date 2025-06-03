@@ -33,6 +33,10 @@ unique, counts = np.unique(seq_strings, return_counts=True)
 n = sum(counts)
 Hd = (n / (n - 1)) * (1 - sum((c / n) ** 2 for c in counts))
 
+# Unique haplotypes
+haplotypes = set(str(seq) for seq in msa)
+
 # Print
 print(f"✅ Nucleotide Diversity (π): {pi:.4f}")
 print(f"✅ Haplotype Diversity (Hd): {Hd:.4f}")
+print(f"✅ Unique Haplotypes: {len(haplotypes)}")
