@@ -23,17 +23,23 @@ def plot_pcoa(distance_matrix, labels, save_path='pcoa_plot.png'):
     pcoa = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
     coords = pcoa.fit_transform(distance_matrix)
 
-    # Buat dataframe plotting
     df = pd.DataFrame(coords, columns=["PCo1", "PCo2"])
     df["SampleID"] = labels
     df["Group"] = [extract_prefix(label) for label in labels]
 
-    plt.figure(figsize=(10, 8))
-    sns.scatterplot(data=df, x="PCo1", y="PCo2", hue="Group", s=70, palette="tab10")
+    plt.figure(figsize=(12, 10))
+    sns.scatterplot(data=df, x="PCo1", y="PCo2", hue="Group", s=80, palette="tab10")
 
-    # Tambahkan label titik
+    # Tentukan batas axis dengan margin ekstra supaya titik tidak terlalu rapat di tepi
+    margin = 0.1
+    x_min, x_max = df["PCo1"].min(), df["PCo1"].max()
+    y_min, y_max = df["PCo2"].min(), df["PCo2"].max()
+    plt.xlim(x_min - margin, x_max + margin)
+    plt.ylim(y_min - margin, y_max + margin)
+
+    # Geser label titik lebih jauh (0.01 atau coba-coba sampai pas)
     for i in range(len(df)):
-        plt.text(df["PCo1"][i]+0.003, df["PCo2"][i]+0.003, df["SampleID"][i], fontsize=7)
+        plt.text(df["PCo1"][i] + 0.01, df["PCo2"][i] + 0.01, df["SampleID"][i], fontsize=7)
 
     plt.title("PCoA Plot Variasi Genetik Panthera tigris")
     plt.xlabel("PCo 1")
