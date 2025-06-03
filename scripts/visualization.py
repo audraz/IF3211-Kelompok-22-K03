@@ -4,10 +4,8 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.manifold import MDS
 
+# Bersihkan label dari kata 'Panthera' jika ada
 def clean_labels(raw_labels):
-    """
-    Bersihkan label dengan menghapus kolom 'Panthera' jika ada.
-    """
     cleaned = []
     for label in raw_labels:
         if 'Panthera' in label:
@@ -16,27 +14,42 @@ def clean_labels(raw_labels):
             cleaned.append(label.strip())
     return cleaned
 
+# Ambil prefix (4 huruf pertama) sebagai pengelompokan awal
+def extract_prefix(sample_id):
+    return sample_id[:4]
+
+# Plot PCoA dengan warna per grup
 def plot_pcoa(distance_matrix, labels, save_path='pcoa_plot.png'):
     pcoa = MDS(n_components=2, dissimilarity='precomputed', random_state=42)
     coords = pcoa.fit_transform(distance_matrix)
-    
+
     df = pd.DataFrame(coords, columns=["PCo1", "PCo2"])
-    df["label"] = labels
+    df["SampleID"] = labels
+    df["Group"] = [extract_prefix(label) for label in labels]
 
-    plt.figure(figsize=(8,6))
-    plt.scatter(df["PCo1"], df["PCo2"])
+    plt.figure(figsize=(12, 10))
+    sns.scatterplot(data=df, x="PCo1", y="PCo2", hue="Group", s=80, palette="tab10")
 
-    for i, txt in enumerate(df["label"]):
-        plt.annotate(txt, (df["PCo1"][i], df["PCo2"][i]), fontsize=8)
+    # Tentukan batas axis dengan margin ekstra supaya titik tidak terlalu rapat di tepi
+    margin = 0.1
+    x_min, x_max = df["PCo1"].min(), df["PCo1"].max()
+    y_min, y_max = df["PCo2"].min(), df["PCo2"].max()
+    plt.xlim(x_min - margin, x_max + margin)
+    plt.ylim(y_min - margin, y_max + margin)
+
+    # Geser label titik lebih jauh (0.01 atau coba-coba sampai pas)
+    for i in range(len(df)):
+        plt.text(df["PCo1"][i] + 0.01, df["PCo2"][i] + 0.01, df["SampleID"][i], fontsize=7)
 
     plt.title("PCoA Plot Variasi Genetik Panthera tigris")
     plt.xlabel("PCo 1")
     plt.ylabel("PCo 2")
-    plt.grid(True)
+    plt.legend(title="Kelompok (Prefix ID)")
     plt.tight_layout()
     plt.savefig(save_path, dpi=300)
     plt.close()
 
+# Plot heatmap jarak genetik
 def plot_heatmap(distance_matrix, labels, save_path='heatmap_genetik.png'):
     df = pd.DataFrame(distance_matrix, index=labels, columns=labels)
     plt.figure(figsize=(12, 10))
@@ -46,14 +59,14 @@ def plot_heatmap(distance_matrix, labels, save_path='heatmap_genetik.png'):
     plt.savefig(save_path, dpi=300)
     plt.close()
 
+# Main function
 if __name__ == "__main__":
-    # Load dan bersihkan data
+    # Baca matriks jarak
     df = pd.read_csv("data/result.tsv", sep="\t", index_col=0)
     labels_raw = df.index.tolist()
     labels = clean_labels(labels_raw)
-    
     distance_matrix = df.values
 
     # Panggil visualisasi
-    plot_pcoa(distance_matrix, labels)
-    plot_heatmap(distance_matrix, labels)
+    plot_pcoa(distance_matrix, labels, save_path="pcoa_plot_colored.png")
+    plot_heatmap(distance_matrix, labels, save_path="heatmap_genetik.png")
