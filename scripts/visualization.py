@@ -37,9 +37,11 @@ def plot_pcoa(distance_matrix, labels, save_path='pcoa_plot.png'):
     plt.xlim(x_min - margin, x_max + margin)
     plt.ylim(y_min - margin, y_max + margin)
 
-    # Geser label titik lebih jauh (0.01 atau coba-coba sampai pas)
+    # Tambahkan label titik dengan jitter kecil agar tidak saling menimpa
     for i in range(len(df)):
-        plt.text(df["PCo1"][i] + 0.01, df["PCo2"][i] + 0.01, df["SampleID"][i], fontsize=7)
+        jitter_x = np.random.uniform(-0.005, 0.005)
+        jitter_y = np.random.uniform(-0.005, 0.005)
+        plt.text(df["PCo1"][i] + jitter_x, df["PCo2"][i] + jitter_y, df["SampleID"][i], fontsize=7)
 
     plt.title("PCoA Plot Variasi Genetik Panthera tigris")
     plt.xlabel("PCo 1")
